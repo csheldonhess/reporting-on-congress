@@ -24,47 +24,46 @@ def getTheVotes(offset=0):
 	else:
 		print(r.status_code)
 
+def nominationPrintToFile(item, filehandler):
+	filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
+	filehandler.write('\n\tDemocrats: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['democratic']['yes'], item['democratic']['no']))
+	filehandler.write('Not voting: %s' %item['democratic']['not_voting'])
+	filehandler.write('\n\tRepublicans: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['republican']['yes'], item['republican']['no']))
+	filehandler.write('Not voting: %s' %item['republican']['not_voting'])
+	filehandler.write('\n\tIndependents: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['independent']['yes'], item['independent']['no']))
+	filehandler.write('Not voting: %s' %item['independent']['not_voting'])
+	filehandler.write('\n\n')
+
+def billPrintToFile(item, filehandler):
+	filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
+	filehandler.write('\n\tDemocrats: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['democratic']['yes'], item['democratic']['no']))
+	filehandler.write('Not voting: %s' %item['democratic']['not_voting'])
+	filehandler.write('\n\tRepublicans: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['republican']['yes'], item['republican']['no']))
+	filehandler.write('Not voting: %s' %item['republican']['not_voting'])
+	filehandler.write('\n\tIndependents: ')
+	filehandler.write('Yes: %s, No: %s, ' %(item['independent']['yes'], item['independent']['no']))
+	filehandler.write('Not voting: %s' %item['independent']['not_voting'])
+	filehandler.write('\n\n')	
+
 def prettyPrintToFile(dictionary, filehandler):
 	a_week_ago = aWeekAgo()
 	for item in dictionary['results']['votes']: # a list! of dicts?! ... ok.
 		if item['date'] >= a_week_ago: # if it's within the last week
 			if len(item['bill']) == 0: # it's a nomination
 				if "Confirmed" in item['result'] or "Agreed" in item['result']: #passed
-					filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
-					filehandler.write('\n\tDemocrats: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['democratic']['yes'], item['democratic']['no']))
-					filehandler.write('Not voting: %s' %item['democratic']['not_voting'])
-					filehandler.write('\n\tRepublicans: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['republican']['yes'], item['republican']['no']))
-					filehandler.write('Not voting: %s' %item['republican']['not_voting'])
-					filehandler.write('\n\tIndependents: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['independent']['yes'], item['independent']['no']))
-					filehandler.write('Not voting: %s' %item['independent']['not_voting'])
-					filehandler.write('\n\n')
+					nominationPrintToFile(item, filehandler)
 				else: #failed 
-					filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
-					filehandler.write('\n\tDemocrats: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['democratic']['yes'], item['democratic']['no']))
-					filehandler.write('Not voting: %s' %item['democratic']['not_voting'])
-					filehandler.write('\n\tRepublicans: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['republican']['yes'], item['republican']['no']))
-					filehandler.write('Not voting: %s' %item['republican']['not_voting'])
-					filehandler.write('\n\tIndependents: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['independent']['yes'], item['independent']['no']))
-					filehandler.write('Not voting: %s' %item['independent']['not_voting'])
-					filehandler.write('\n\n')
+					nominationPrintToFile(item, filehandler)
 			else: # a bill!
-					filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
-					filehandler.write('\n\tDemocrats: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['democratic']['yes'], item['democratic']['no']))
-					filehandler.write('Not voting: %s' %item['democratic']['not_voting'])
-					filehandler.write('\n\tRepublicans: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['republican']['yes'], item['republican']['no']))
-					filehandler.write('Not voting: %s' %item['republican']['not_voting'])
-					filehandler.write('\n\tIndependents: ')
-					filehandler.write('Yes: %s, No: %s, ' %(item['independent']['yes'], item['independent']['no']))
-					filehandler.write('Not voting: %s' %item['independent']['not_voting'])
-					filehandler.write('\n\n')				
+				if "Passed" in item['result'] or "Agreed" in item['result']:
+					billPrintToFile(item, filehandler)
+				else:
+					billPrintToFile(item, filehandler)
 
 
 def aWeekAgo():
