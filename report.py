@@ -9,8 +9,8 @@ key = f.readline()
 key = key.strip()
 
 # getting the output files ready
-f2 = open('reverse_chronological_output.txt', 'w')
-f3 = open('pass_fail_order.txt', 'w')
+f2 = open('reverse_chronological_output.md', 'w')
+f3 = open('pass_fail_order.md', 'w')
 
 # using global vars to store each class of item on the pass/fail bill/nomination matrix
 accepted_nominees = []
@@ -40,7 +40,7 @@ def getTheVotes(offset=0):
 		getTheVotes(offset=offset)
 
 def nominationPrintToFile(dictionary, filehandler):
-	filehandler.write('%(result)s: %(description)s, %(date)s' %dictionary)
+	filehandler.write('%(result)s: [%(description)s*](%(url)s), %(date)s' %dictionary)
 	#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
 	filehandler.write('\n\tDemocrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
@@ -78,7 +78,7 @@ def nominationFormatter(item):
 	return dictionary
 
 def billPrintToFile(dictionary, filehandler):
-	filehandler.write('%(question)s, %(title)s (%(bill_id)s): %(result)s, %(date)s' %dictionary)
+	filehandler.write('%(question)s, [%(title)s](%(url)s) (%(bill_id)s): %(result)s, %(date)s' %dictionary)
 	#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
 	filehandler.write('\n\tDemocrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
