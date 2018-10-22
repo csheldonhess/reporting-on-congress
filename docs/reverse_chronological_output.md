@@ -183,17 +183,4 @@ On Ordering the Previous Question, [Providing for consideration of the conferenc
 	Republicans: Yes: 230, No: 0, Not voting: 6
 	Independents: Yes: 0, No: 0, Not voting: 0
 
-On Motion to Suspend the Rules and Pass, as Amended, [To amend the Small Business Act to eliminate the inclusion of option years in the award price for sole source contracts, and for other purposes.](http://clerk.house.gov/evs/2018/roll401.xml) (hr6369-115): Passed, 2018-09-25ing: 0
-	Republicans: Yes: 50, No: 0, Not voting: 1
-	Independents: Yes: 1, No: 1, Not voting: 0
-
-Cloture Motion Agreed to: [Peter A. Feldman, of the District of Columbia, to be a Commissioner of the Consumer Product Safety Commission for the remainder of the term expiring October 26, 2019*](https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00214), 2018-09-24
-	Democrats: Yes: 29, No: 17, Not voting: 1
-	Republicans: Yes: 46, No: 0, Not voting: 5
-	Independents: Yes: 1, No: 1, Not voting: 0
-
-Nomination Confirmed: [Jackie Wolcott, of Virginia, to be Representative of the United States of America to the Vienna Office of the United Nations, with the rank of Ambassador; and Jackie Wolcott, of Virginia, to be Representative of the United States of America to the International Atomic Energy Agency, with the rank of Ambassador*](https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00213), 2018-09-24
-	Democrats: Yes: 29, No: 17, Not voting: 1
-	Republicans: Yes: 45, No: 1, Not voting: 5
-	Independents: Yes: 1, No: 1, Not voting: 0
-
+On Motion to Suspend the Rules and Pass, as Amended, [To amend the Small Business Act to eliminate the inclusion of option years in the award price for sole source contracts, and for other purposes.](http://clerk.house.gov/evs/2018/roll401.xml) (hr6369-115): Passed, 2018-09-25
