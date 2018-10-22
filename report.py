@@ -1,4 +1,4 @@
-import requests, json, datetime
+import requests, datetime
 
 # TODO: Change it back so that a week is actually a single week!
 
