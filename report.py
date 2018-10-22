@@ -9,8 +9,8 @@ key = f.readline()
 key = key.strip()
 
 # getting the output files ready
-f2 = open('reverse_chronological_output.md', 'w')
-f3 = open('pass_fail_order.md', 'w')
+f2 = open('docs/reverse_chronological_output.md', 'w')
+f3 = open('docs/pass_fail_order.md', 'w')
 
 # using global vars to store each class of item on the pass/fail bill/nomination matrix
 accepted_nominees = []
