@@ -1,4 +1,4 @@
-import requests, datetime
+import requests, json, datetime
 
 # grab the api key, which I've got in my .gitignore file so I don't
 # push it to GitHub
@@ -34,6 +34,10 @@ def getTheVotes(offset=0):
 	r = requests.get(url, params=params, headers=head)
 	if r.status_code == 200:
 		data = r.json()
+		# this made it esier to pull apart the format
+		# (and also to test when nothing new came up after 10/11)
+		# with open('testing.txt', 'w') as testfile:
+		# 	testfile.write(json.dumps(data))
 		flag = printInReverseChronOrder(data, f2)
 	else:
 		print(r.status_code)
@@ -41,6 +45,7 @@ def getTheVotes(offset=0):
 	if flag == True:
 		printInPassFailOrder(f3, f4)
 	else:
+		printInPassFailOrder(f3, f4)
 		offset += 20
 		getTheVotes(offset=offset)
 
