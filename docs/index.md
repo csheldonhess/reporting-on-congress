@@ -1,5 +1,5 @@
 
-<button style="background-color: #0090ff; border: none; color: white; padding: 15px 32px; text-align: center; font-weight: bold; text-decoration: none; display: inline-block; margin-left: auto; margin-right: auto; font-size: 16px; border-radius: 8px; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" onclick="https://csheldonhess.github.io/reporting-on-congress/reverse_chronological_output.html">Reverse Chronological</button>
+<a style="background-color: #0090ff; border: none; color: white; padding: 15px 32px; text-align: center; font-weight: bold; text-decoration: none; display: inline-block; margin-left: auto; margin-right: auto; font-size: 16px; border-radius: 8px; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" href="https://csheldonhess.github.io/reporting-on-congress/reverse_chronological_output.html">Reverse Chronological</button>
 
 <button style="background-color: #0090ff; border: none; color: white; padding: 15px 32px; text-align: center; font-weight: bold; text-decoration: none; display: inline-block; margin-left: auto; margin-right: auto;  font-size: 16px; border-radius: 8px; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" onclick="https://csheldonhess.github.io/reporting-on-congress/passed.html">Passed/Accepted</button>
 
