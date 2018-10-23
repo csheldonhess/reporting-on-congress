@@ -1,7 +1,5 @@
 import requests, datetime
 
-# TODO: Change it back so that a week is actually a single week!
-
 # grab the api key, which I've got in my .gitignore file so I don't
 # push it to GitHub
 f = open('api-key.txt', 'r')
@@ -9,9 +7,12 @@ key = f.readline()
 key = key.strip()
 
 # getting the output files ready
-f2 = open('docs/reverse_chronological_output.md', 'w')
+f2 = open('docs/reverse_chronological.md', 'w')
 f3 = open('docs/passed.md', 'w')
 f4 = open('docs/failed.md', 'w')
+f2.write('[Reporting on Congress](index.md) &gt; Reverse Chronological\n\n')
+f3.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
+f4.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
 
 # using global vars to store each class of item on the pass/fail bill/nomination matrix
 accepted_nominees = []
@@ -44,7 +45,7 @@ def getTheVotes(offset=0):
 		getTheVotes(offset=offset)
 
 def nominationPrintToFile(dictionary, filehandler):
-	filehandler.write('%(result)s: [%(description)s*](%(url)s), %(date)s' %dictionary)
+	filehandler.write('%(result)s: [%(description)s*](%(url)s), %(chamber)s %(date)s' %dictionary)
 	#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
 	filehandler.write('\n* Democrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
@@ -82,7 +83,7 @@ def nominationFormatter(item):
 	return dictionary
 
 def billPrintToFile(dictionary, filehandler):
-	filehandler.write('%(question)s, [%(title)s](%(url)s) (%(bill_id)s): %(result)s, %(date)s' %dictionary)
+	filehandler.write('%(question)s, [%(title)s](%(url)s) (%(chamber)s: %(bill_id)s): %(result)s, %(date)s' %dictionary)
 	#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
 	filehandler.write('\n* Democrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
@@ -125,7 +126,7 @@ def printInReverseChronOrder(dictionary, filehandler):
 	# presumably, Congress could do more in a week than 20 things!
 	old_enough = False 
 	a_week_ago = aWeekAgo()
-	printed = first_print
+	printed = first_print # messy, but the interpreter wouldn't let me use the global var
 	if printed == True:
 		filehandler.write('All votes held, in reverse chronological order:\n')
 		filehandler.write('============================================== \n\n')
@@ -158,20 +159,26 @@ def printInPassFailOrder(filehandler1, filehandler2): # using global variables, 
 		# now we will print a second output file, in order by what passed/failed
 	filehandler1.write('All of the votes that passed/were accepted:\n')
 	filehandler1.write('==========================================\n\n')
-	for item in passed_bills:
-		billPrintToFile(item, filehandler1)
-	for item in accepted_nominees:
-		nominationPrintToFile(item, filehandler1)
+	if len(passed_bills) > 0 or len(accepted_nominees) > 0:
+		for item in passed_bills:
+			billPrintToFile(item, filehandler1)
+		for item in accepted_nominees:
+			nominationPrintToFile(item, filehandler1)
+	else:
+		filehandler1.write('No votes passed or were accepted in the last week.\n\n')
 	filehandler2.write('All of the votes that failed/were rejected:\n')
 	filehandler2.write('==========================================\n\n')
-	for item in failed_bills:
-		billPrintToFile(item, filehandler2)
-	for item in rejected_nominees:
-		nominationPrintToFile(item, filehandler2)
+	if len(failed_bills) > 0 or len(rejected_nominees) > 0:
+		for item in failed_bills:
+			billPrintToFile(item, filehandler2)
+		for item in rejected_nominees:
+			nominationPrintToFile(item, filehandler2)
+	else:
+		filehandler2.write('No bills or nominations failed in the last week.\n\n')
 
 def aWeekAgo():
 	today = datetime.date.today()
-	a_week_ago = today - datetime.timedelta(days=30)
+	a_week_ago = today - datetime.timedelta(days=14)
 	return str(a_week_ago)
 
 getTheVotes()
