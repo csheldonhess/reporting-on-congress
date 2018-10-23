@@ -10,13 +10,17 @@ key = key.strip()
 
 # getting the output files ready
 f2 = open('docs/reverse_chronological_output.md', 'w')
-f3 = open('docs/pass_fail_order.md', 'w')
+f3 = open('docs/passed.md', 'w')
+f4 = open('docs/failed.md', 'w')
 
 # using global vars to store each class of item on the pass/fail bill/nomination matrix
 accepted_nominees = []
 rejected_nominees = []
 passed_bills = []
 failed_bills = []
+
+# checking to see if this is our first time through the reverse chron printing function
+first_print = True
 
 # just checking that they key got pulled correctly
 # print('__%s__'%key)
@@ -34,7 +38,7 @@ def getTheVotes(offset=0):
 		print(r.status_code)
 		return False # gotta quit before we get in an infinite recursive loop
 	if flag == True:
-		printInPassFailOrder(f3)
+		printInPassFailOrder(f3, f4)
 	else:
 		offset += 20
 		getTheVotes(offset=offset)
@@ -42,13 +46,13 @@ def getTheVotes(offset=0):
 def nominationPrintToFile(dictionary, filehandler):
 	filehandler.write('%(result)s: [%(description)s*](%(url)s), %(date)s' %dictionary)
 	#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
-	filehandler.write('\n\tDemocrats: ')
+	filehandler.write('\n* Democrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
-	filehandler.write('\n\tRepublicans: ')
+	filehandler.write('\n* Republicans: ')
 	filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
-	filehandler.write('\n\tIndependents: ')
+	filehandler.write('\n* Independents: ')
 	filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
 	filehandler.write('\n\n')
@@ -80,13 +84,13 @@ def nominationFormatter(item):
 def billPrintToFile(dictionary, filehandler):
 	filehandler.write('%(question)s, [%(title)s](%(url)s) (%(bill_id)s): %(result)s, %(date)s' %dictionary)
 	#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
-	filehandler.write('\n\tDemocrats: ')
+	filehandler.write('\n* Democrats: ')
 	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
-	filehandler.write('\n\tRepublicans: ')
+	filehandler.write('\n* Republicans: ')
 	filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
-	filehandler.write('\n\tIndependents: ')
+	filehandler.write('\n* Independents: ')
 	filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
 	filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
 	filehandler.write('\n\n')	
@@ -121,6 +125,11 @@ def printInReverseChronOrder(dictionary, filehandler):
 	# presumably, Congress could do more in a week than 20 things!
 	old_enough = False 
 	a_week_ago = aWeekAgo()
+	printed = first_print
+	if printed == True:
+		filehandler.write('All votes held, in reverse chronological order:\n')
+		filehandler.write('============================================== \n\n')
+		printed = False
 	for item in dictionary['results']['votes']: # a list! of dicts?! ... ok.
 		if item['date'] >= a_week_ago: # if it's within the last week
 			if len(item['bill']) == 0: # it's a nomination
@@ -145,20 +154,20 @@ def printInReverseChronOrder(dictionary, filehandler):
 			old_enough = True
 	return old_enough
 
-def printInPassFailOrder(filehandler): # using global variables, ehhhh?
+def printInPassFailOrder(filehandler1, filehandler2): # using global variables, ehhhh?
 		# now we will print a second output file, in order by what passed/failed
-	filehandler.write('Passed Bills and Accepted Nominations:\n')
-	filehandler.write('=====================================\n\n')
+	filehandler1.write('All of the votes that passed/were accepted:\n')
+	filehandler1.write('==========================================\n\n')
 	for item in passed_bills:
-		billPrintToFile(item, filehandler)
+		billPrintToFile(item, filehandler1)
 	for item in accepted_nominees:
-		nominationPrintToFile(item, filehandler)
-	filehandler.write('Failed Bills and Rejected Nominations:\n')
-	filehandler.write('=====================================\n\n')
+		nominationPrintToFile(item, filehandler1)
+	filehandler2.write('All of the votes that failed/were rejected:\n')
+	filehandler2.write('==========================================\n\n')
 	for item in failed_bills:
-		billPrintToFile(item, filehandler)
+		billPrintToFile(item, filehandler2)
 	for item in rejected_nominees:
-		nominationPrintToFile(item, filehandler)
+		nominationPrintToFile(item, filehandler2)
 
 def aWeekAgo():
 	today = datetime.date.today()
