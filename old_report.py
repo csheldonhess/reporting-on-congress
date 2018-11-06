@@ -1,15 +1,18 @@
 import requests, json, datetime
 
+# grab the api key, which I've got in my .gitignore file so I don't
+# push it to GitHub
+f = open('api-key.txt', 'r')
+key = f.readline()
+key = key.strip()
+
 # getting the output files ready
-try: 
-	f2 = open('docs/reverse_chronological.md', 'w')
-	f3 = open('docs/passed.md', 'w')
-	f4 = open('docs/failed.md', 'w')
-	f2.write('[Reporting on Congress](index.md) &gt; Reverse Chronological\n\n')
-	f3.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
-	f4.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
-except OSError as e:
-	print('Cannot open files. ', e)
+f2 = open('docs/reverse_chronological.md', 'w')
+f3 = open('docs/passed.md', 'w')
+f4 = open('docs/failed.md', 'w')
+f2.write('[Reporting on Congress](index.md) &gt; Reverse Chronological\n\n')
+f3.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
+f4.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
 
 # using global vars to store each class of item on the pass/fail bill/nomination matrix
 accepted_nominees = []
@@ -18,9 +21,7 @@ passed_bills = []
 failed_bills = []
 
 # checking to see if this is our first time through the reverse chron printing function
-first_chron_print = True
-first_pass_print = True
-first_fail_print = True
+first_print = True
 
 # just checking that they key got pulled correctly
 # print('__%s__'%key)
@@ -31,13 +32,16 @@ def getTheVotes(offset=0):
 	head = {'X-API-Key': key}
 	params = {'offset': offset}
 	r = requests.get(url, params=params, headers=head)
-	assert(r.status_code == 200), 'Unable to fetch data from server: %s'%str(r.status_code)
-	data = r.json()
-	# this made it esier to pull apart the format
-	# (and also to test when nothing new came up after 10/11)
-	# with open('testing.txt', 'w') as testfile:
-	# 	testfile.write(json.dumps(data))
-	flag = printInReverseChronOrder(data, f2)
+	if r.status_code == 200:
+		data = r.json()
+		# this made it esier to pull apart the format
+		# (and also to test when nothing new came up after 10/11)
+		# with open('testing.txt', 'w') as testfile:
+		# 	testfile.write(json.dumps(data))
+		flag = printInReverseChronOrder(data, f2)
+	else:
+		print(r.status_code)
+		return False # gotta quit before we get in an infinite recursive loop
 	if flag == True:
 		printInPassFailOrder(f3, f4)
 	else:
@@ -127,11 +131,11 @@ def printInReverseChronOrder(dictionary, filehandler):
 	# presumably, Congress could do more in a week than 20 things!
 	old_enough = False 
 	a_week_ago = aWeekAgo()
-	global first_chron_print # lets me use/set global variable in the function
-	if first_chron_print: # because we do not want to print the header multiple times
+	printed = first_print # messy, but the interpreter wouldn't let me use the global var
+	if printed == True:
 		filehandler.write('All votes held, in reverse chronological order:\n')
 		filehandler.write('============================================== \n\n')
-		first_chron_print = False
+		printed = False
 	for item in dictionary['results']['votes']: # a list! of dicts?! ... ok.
 		if item['date'] >= a_week_ago: # if it's within the last week
 			if len(item['bill']) == 0: # it's a nomination
@@ -156,15 +160,10 @@ def printInReverseChronOrder(dictionary, filehandler):
 			old_enough = True
 	return old_enough
 
-def printInPassFailOrder(filehandler1, filehandler2): 
-	# we do not want to print our headers more than once
-	global first_pass_print
-	global first_fail_print
-	# now we will print a second output file, in order by what passed/failed
-	if first_pass_print:
-		filehandler1.write('All of the votes that passed/were accepted:\n')
-		filehandler1.write('==========================================\n\n')
-		first_pass_print = False
+def printInPassFailOrder(filehandler1, filehandler2): # using global variables, ehhhh?
+		# now we will print a second output file, in order by what passed/failed
+	filehandler1.write('All of the votes that passed/were accepted:\n')
+	filehandler1.write('==========================================\n\n')
 	if len(passed_bills) > 0 or len(accepted_nominees) > 0:
 		for item in passed_bills:
 			billPrintToFile(item, filehandler1)
@@ -172,10 +171,8 @@ def printInPassFailOrder(filehandler1, filehandler2):
 			nominationPrintToFile(item, filehandler1)
 	else:
 		filehandler1.write('No votes passed or were accepted in the last week.\n\n')
-	if first_fail_print:
-		filehandler2.write('All of the votes that failed/were rejected:\n')
-		filehandler2.write('==========================================\n\n')
-		first_fail_print = False
+	filehandler2.write('All of the votes that failed/were rejected:\n')
+	filehandler2.write('==========================================\n\n')
 	if len(failed_bills) > 0 or len(rejected_nominees) > 0:
 		for item in failed_bills:
 			billPrintToFile(item, filehandler2)
@@ -186,19 +183,7 @@ def printInPassFailOrder(filehandler1, filehandler2):
 
 def aWeekAgo():
 	today = datetime.date.today()
-	a_week_ago = today - datetime.timedelta(days=40)
+	a_week_ago = today - datetime.timedelta(days=14)
 	return str(a_week_ago)
 
-# grab the api key, which I've got in my .gitignore file so I don't
-# push it to GitHub
-with open('api-key.txt', 'r') as f:
-	key = f.readline()
-	key = key.strip()
-	try:
-		getTheVotes()
-	except AssertionError as e: 
-		print('The API is currently unavailable.')
-
-f2.close()
-f3.close()
-f4.close()
+getTheVotes()
