@@ -1,21 +1,5 @@
 import requests, json, datetime
 
-# getting the output files ready
-try: 
-	all_file = open('docs/reverse_chronological.md', 'w')
-	passed_file = open('docs/passed.md', 'w')
-	failed_file = open('docs/failed.md', 'w')
-	house_file = open('docs/house.md', 'w')
-	senate_file = open('docs/senate.md', 'w')
-	# just making nice breadcrumbs for usability of the site
-	all_file.write('[Reporting on Congress](index.md) &gt; Everything\n\n')
-	passed_file.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
-	failed_file.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
-	house_file.write('[Reporting on Congress](index.md) &gt; House\n\n')
-	senate_file.write('[Reporting on Congress](index.md) &gt; Senate\n\n')
-except OSError as e:
-	print('Cannot open files. ', e)
-
 # go out to ProPublica and get the votes, appending them to a list that
 # has been passed in (all_actions); because this may get called multiple times,
 # we have an optional offset (the multiple calls are also why we're passing
@@ -32,7 +16,8 @@ def getTheVotes(all_actions, offset=0):
 		if item['date'] >= a_week_ago: # if it's within the last week
 			if len(item['bill']) == 0: # it's a nomination
 				nom = nominationFormatter(item) # format it my way!
-				if nom not in all_actions: # let's avoid duplicates
+				# let's avoid duplicates
+				if nom not in all_actions and 'Cloture' not in nom['result']: 
 					all_actions.append(nom)
 			else: # a bill!
 				bill = billFormatter(item)
@@ -186,6 +171,7 @@ def writeTheMarkdown(all_actions, all_fh, pass_fh, fail_fh, house_fh, senate_fh)
 	all_fh.write('============================================== \n\n')
 	for item in all_actions:
 		votePrintToFile(item, all_fh)
+		addNews(item, all_fh)
 
 	# now we subdivide our item
 	sub_actions = breakIntoSubCategories(all_actions)
@@ -213,6 +199,7 @@ def writeOneSection(category, noun, verb, filehandler):
 	else:
 		for item in category:
 			votePrintToFile(item, filehandler)
+			addNews(item, filehandler)
 
 # returns a string representing a date one week ago
 def aWeekAgo():
@@ -224,24 +211,82 @@ def aWeekAgo():
 def aMonthAgo():
 	today = datetime.date.today()
 	# look, if I go back a full month, sometimes they throw an error
-	# so I'm doing a month minus a day, to be safe
+	# so I'm doing 28 days
 	a_month_ago = today - datetime.timedelta(days = 28)
 	return str(a_month_ago)
 
 # formats articles pulled from the news api for nice display
 def articleFormatter(articles):
-	bullets = "\tRelated articles:\n"
-	for article in articles:
-		title = article['title']
-		url = article['url']
-		author = article['author']
-		source = article['source']['name']
-		bullets += '\t* [%s](%s)'%(title, url)
-		if author:
-			bullets += ' by %s - %s\n'%(author, source)
-		else:
-			bullets += ' - %s\n'%source
-	return bullets
+	if len(articles) > 0:
+		bullets = "\t*Related articles*:\n"
+		for article in articles:
+			title = article['title']
+			url = article['url']
+			author = article['author']
+			source = article['source']['name']
+			bullets += '\t* [%s](%s)'%(title, url)
+			if author:
+				bullets += ' by %s - %s\n'%(author, source)
+			else:
+				bullets += ' - %s\n'%source
+		return bullets + '\n'
+	else: # if we have nothing to add, let's not add it!
+		return ''
+
+# takes a single vote and looks for articles related to it
+# a thesis could be written on how best to do this search
+# but I'm not writing that thesis today
+def addNews(item, filehandler):
+	# there is room for improvement in choosing our search query
+	# but this is how I'm doing it for now
+	if item['type'] == 'nom':
+		question = item['nominee'] + ' ' + item['chamber']
+	else:
+		question = item['title'] + ' ' + item['chamber']
+
+	# grab the api key, which I've got in my .gitignore file so I don't
+	# push it to GitHub
+	with open('news-key.txt', 'r') as f:
+		key = f.readline()
+		key = key.strip()
+		try:
+			url = 'https://newsapi.org/v2/everything'
+			params = {'q': question,
+					  'from': aMonthAgo(),
+					  'sortBy': 'relevancy',
+					  'excludeDomains': 'aol.com,thehill.com,seattletimes.com,stltoday.com',
+					  'apiKey': key
+			}
+			response = requests.get(url, params=params)
+			assert(response.status_code == 200), 'Unable to fetch data from server: %s'%str(r.status_code)
+			data = response.json()
+			# what an incredibly straightforward schema they have
+			articles = data['articles']
+
+			# no more than five articles about any one thing; arbitrary but fair
+			if len(articles) > 5:
+				articles = articles[0:5]
+			# write nicely formatted articles 
+			filehandler.write(articleFormatter(articles))
+
+		except AssertionError as e: 
+			print('The News API is currently unavailable.')
+
+# getting the output files ready
+try: 
+	all_file = open('docs/reverse_chronological.md', 'w')
+	passed_file = open('docs/passed.md', 'w')
+	failed_file = open('docs/failed.md', 'w')
+	house_file = open('docs/house.md', 'w')
+	senate_file = open('docs/senate.md', 'w')
+	# just making nice breadcrumbs for usability of the site
+	all_file.write('[Reporting on Congress](index.md) &gt; Everything\n\n')
+	passed_file.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
+	failed_file.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
+	house_file.write('[Reporting on Congress](index.md) &gt; House\n\n')
+	senate_file.write('[Reporting on Congress](index.md) &gt; Senate\n\n')
+except OSError as e:
+	print('Cannot open files. ', e)
 
 # grab the api key, which I've got in my .gitignore file so I don't
 # push it to GitHub
@@ -259,7 +304,7 @@ with open('propublica-key.txt', 'r') as f:
 			votes = getTheVotes(votes, offset)
 		writeTheMarkdown(votes, all_file, passed_file, failed_file, house_file, senate_file)
 	except AssertionError as e: 
-		print('The API is currently unavailable.')
+		print('The ProPublica API is currently unavailable.')
 
 all_file.close()
 passed_file.close()

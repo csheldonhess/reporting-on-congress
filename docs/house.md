@@ -8,6 +8,9 @@ On Motion to Suspend the Rules and Pass, as Amended, [To amend chapter 36 of tit
 * Republicans: Yes: 212, No: 0, Not voting: 24
 * Independents: Yes: 0, No: 0, Not voting: 0
 
+	*Related articles*:
+	* [Legal Research Reports: Regulation of Cryptocurrency](https://www.loc.gov/law/help/cryptocurrency/world-survey.php?loclr=ealrr) - Loc.gov
+
 On Motion to Suspend the Rules and Pass, [To extend the National Flood Insurance Program until December 7, 2018.](http://clerk.house.gov/evs/2018/roll424.xml) (House: hr7187-115): Passed, 2018-11-29
 * Democrats: Yes: 178, No: 0, Not voting: 19
 * Republicans: Yes: 172, No: 46, Not voting: 18
