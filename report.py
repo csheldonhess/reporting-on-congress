@@ -2,103 +2,133 @@ import requests, json, datetime
 
 # getting the output files ready
 try: 
-	f2 = open('docs/reverse_chronological.md', 'w')
-	f3 = open('docs/passed.md', 'w')
-	f4 = open('docs/failed.md', 'w')
-	f2.write('[Reporting on Congress](index.md) &gt; Reverse Chronological\n\n')
-	f3.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
-	f4.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
+	all_file = open('docs/reverse_chronological.md', 'w')
+	passed_file = open('docs/passed.md', 'w')
+	failed_file = open('docs/failed.md', 'w')
+	house_file = open('docs/house.md', 'w')
+	senate_file = open('docs/senate.md', 'w')
+	# just making nice breadcrumbs for usability of the site
+	all_file.write('[Reporting on Congress](index.md) &gt; Everything\n\n')
+	passed_file.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
+	failed_file.write('[Reporting on Congress](index.md) &gt; Failed\n\n')
+	house_file.write('[Reporting on Congress](index.md) &gt; House\n\n')
+	senate_file.write('[Reporting on Congress](index.md) &gt; Senate\n\n')
 except OSError as e:
 	print('Cannot open files. ', e)
 
-# using global vars to store each class of item on the pass/fail bill/nomination matrix
-accepted_nominees = []
-rejected_nominees = []
-passed_bills = []
-failed_bills = []
-
-# checking to see if this is our first time through the reverse chron printing function
-first_chron_print = True
-first_pass_print = True
-first_fail_print = True
-
-# just checking that they key got pulled correctly
-# print('__%s__'%key)
-
-def getTheVotes(offset=0):
-	flag = False # checking to see if we need to go back further
+# go out to ProPublica and get the votes, appending them to a list that
+# has been passed in (all_actions); because this may get called multiple times,
+# we have an optional offset (the multiple calls are also why we're passing
+# around this dictionary, all_actions)
+def getTheVotes(all_actions, offset=0):
 	url = 'https://api.propublica.org/congress/v1/both/votes/recent.json'
 	head = {'X-API-Key': key}
 	params = {'offset': offset}
 	r = requests.get(url, params=params, headers=head)
 	assert(r.status_code == 200), 'Unable to fetch data from server: %s'%str(r.status_code)
 	data = r.json()
-	# this made it esier to pull apart the format
-	# (and also to test when nothing new came up after 10/11)
-	# with open('testing.txt', 'w') as testfile:
-	# 	testfile.write(json.dumps(data))
-	flag = printInReverseChronOrder(data, f2)
-	if flag == True:
-		printInPassFailOrder(f3, f4)
-	else:
-		printInPassFailOrder(f3, f4)
-		offset += 20
-		getTheVotes(offset=offset)
+	a_week_ago = aWeekAgo()
+	for item in data['results']['votes']: # a list! of dicts?! ... ok.
+		if item['date'] >= a_week_ago: # if it's within the last week
+			if len(item['bill']) == 0: # it's a nomination
+				nom = nominationFormatter(item) # format it my way!
+				if nom not in all_actions: # let's avoid duplicates
+					all_actions.append(nom)
+			else: # a bill!
+				bill = billFormatter(item)
+				if bill not in all_actions:
+					all_actions.append(bill)
+	return all_actions
 
-def nominationPrintToFile(dictionary, filehandler):
-	filehandler.write('%(result)s: [%(description)s*](%(url)s), %(chamber)s %(date)s' %dictionary)
-	#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
-	filehandler.write('\n* Democrats: ')
-	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
-	filehandler.write('\n* Republicans: ')
-	filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
-	filehandler.write('\n* Independents: ')
-	filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
-	filehandler.write('\n\n')
+# returns True if we need to make another call to ProPublica's API
+# returns False if we have data older than a week already
+# the list we pass in is formatted my way, not ProPublica's way
+def goBackFurther(all_actions):
+	# loop through the whole dictionary, looking for a date older than
+	# a week old; if none are found, we probably need to look further back
+	a_week_ago = aWeekAgo()
+	for item in all_actions: 
+		if item['date'] >= a_week_ago:
+			return False
+	return True
 
-def nominationFormatter(item):
-	dictionary = {
-		'result': item['result'],
-		'description': item['description'],
-		'nominee': item['nomination']['name'],
-		'number': item['nomination']['number'],
-		'nomination_id': item['nomination']['nomination_id'],
-		'agency': item['nomination']['agency'],
-		'url': item['url'],
-		'vote_uri': item['vote_uri'],
-		'chamber': item['chamber'],
-		'date': item['date'],
-		'democratic_yes': item['democratic']['yes'],
-		'democratic_no': item['democratic']['no'],
-		'democratic_not_voting': item['democratic']['not_voting'],
-		'republican_yes': item['republican']['yes'],
-		'republican_no': item['republican']['no'],
-		'republican_not_voting': item['republican']['not_voting'],
-		'independent_yes': item['independent']['yes'],
-		'independent_no': item['independent']['no'],
-		'independent_not_voting': item['independent']['not_voting']
+# we want to separate out all of the actions that have been taken
+# into passed/failed, bill/nomination, and maybe other categories,
+# for a nice, user-friendly display
+def breakIntoSubCategories(all_actions):
+	# set myself up with some nice empty lists
+	accepted_nominees = []
+	rejected_nominees = []
+	passed_bills = []
+	rejected_bills = []
+	house_actions = []
+	senate_actions = []
+	for item in all_actions:
+		if item['type'] == 'nom': # it's a nomination
+			if "Confirmed" in item['result'] or "Agreed" in item['result']: #passed
+				accepted_nominees.append(item)
+			else: #failed nomination
+				rejected_nominees.append(item)
+		else: # a bill!
+			if "Passed" in item['result'] or "Agreed" in item['result']:
+				passed_bills.append(item)
+			else:
+				rejected_bills.append(item)
+		if item['chamber'] == 'House':
+			house_actions.append(item)
+		else:
+			senate_actions.append(item)
+	subdivided_actions = {
+		'accepted_nominees': accepted_nominees,
+		'rejected_nominees': rejected_nominees,
+		'passed_bills': passed_bills,
+		'rejected_bills': rejected_bills,
+		'house_actions': house_actions,
+		'senate_actions': senate_actions
 	}
-	return dictionary
+	# useful to make sure my logic's good, but not something I always want
+	# print('everything: ', str(len(all_actions)))
+	# print('accepted noms: ', str(len(accepted_nominees)))
+	# print('rejected noms: ', str(len(rejected_nominees)))
+	# print('passed bills: ', str(len(passed_bills)))
+	# print('rejected bills: ', str(len(rejected_bills)))
+	return subdivided_actions
 
-def billPrintToFile(dictionary, filehandler):
-	filehandler.write('%(question)s, [%(title)s](%(url)s) (%(chamber)s: %(bill_id)s): %(result)s, %(date)s' %dictionary)
-	#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
-	filehandler.write('\n* Democrats: ')
-	filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
-	filehandler.write('\n* Republicans: ')
-	filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
-	filehandler.write('\n* Independents: ')
-	filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
-	filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
-	filehandler.write('\n\n')	
+# this expects a single vote, formatted my way (by nominationFormatter/billFormatter)
+def votePrintToFile(dictionary, filehandler):
+	if dictionary['type'] == 'bill': # if it's a nomination
+		filehandler.write('%(question)s, [%(title)s](%(url)s) (%(chamber)s: %(bill_id)s): %(result)s, %(date)s' %dictionary)
+		#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
+		filehandler.write('\n* Democrats: ')
+		filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
+		filehandler.write('\n* Republicans: ')
+		filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
+		filehandler.write('\n* Independents: ')
+		filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
+		filehandler.write('\n\n')	
+	else: # if it's a bill
+		filehandler.write('%(result)s: [%(description)s*](%(url)s), %(chamber)s %(date)s' %dictionary)
+		#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
+		filehandler.write('\n* Democrats: ')
+		filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['democratic_not_voting'])
+		filehandler.write('\n* Republicans: ')
+		filehandler.write('Yes: %(republican_yes)s, No: %(republican_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['republican_not_voting'])
+		filehandler.write('\n* Independents: ')
+		filehandler.write('Yes: %(independent_yes)s, No: %(independent_no)s, ' %dictionary)
+		filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
+		filehandler.write('\n\n')
 
+# there's nothing wrong with ProPublica's formatting of their data, but
+# if I can make it more convenient for myself, why wouldn't I? right?
+# So this puts bills into a flat, easy-to-access dictionary for me
 def billFormatter(item):
 	dictionary = {
+		'type': 'bill',
 		'question': item['question'],
 		'title': item['bill']['title'],
 		'bill_id': item['bill']['bill_id'],
@@ -122,83 +152,117 @@ def billFormatter(item):
 	}
 	return dictionary
 
-def printInReverseChronOrder(dictionary, filehandler):
-	# we need a way to know if the records we're grabbing are old enough
-	# presumably, Congress could do more in a week than 20 things!
-	old_enough = False 
-	a_week_ago = aWeekAgo()
-	global first_chron_print # lets me use/set global variable in the function
-	if first_chron_print: # because we do not want to print the header multiple times
-		filehandler.write('All votes held, in reverse chronological order:\n')
-		filehandler.write('============================================== \n\n')
-		first_chron_print = False
-	for item in dictionary['results']['votes']: # a list! of dicts?! ... ok.
-		if item['date'] >= a_week_ago: # if it's within the last week
-			if len(item['bill']) == 0: # it's a nomination
-				if "Confirmed" in item['result'] or "Agreed" in item['result']: #passed
-					nom = nominationFormatter(item)
-					accepted_nominees.append(nom)
-					nominationPrintToFile(nom, filehandler)
-				else: #failed 
-					nom = nominationFormatter(item)
-					nominationPrintToFile(nom, filehandler)
-					rejected_nominees.append(nom)
-			else: # a bill!
-				if "Passed" in item['result'] or "Agreed" in item['result']:
-					bill = billFormatter(item)
-					billPrintToFile(bill, filehandler)
-					passed_bills.append(bill)
-				else:
-					bill = billFormatter(item)
-					billPrintToFile(bill, filehandler)
-					failed_bills.append(bill)
-		else: # if we have something more than a week old
-			old_enough = True
-	return old_enough
+# this puts nominations into a flat, easy-to-access dictionary for me
+def nominationFormatter(item):
+	dictionary = {
+		'type': 'nom',
+		'result': item['result'],
+		'description': item['description'],
+		'nominee': item['nomination']['name'],
+		'number': item['nomination']['number'],
+		'nomination_id': item['nomination']['nomination_id'],
+		'agency': item['nomination']['agency'],
+		'url': item['url'],
+		'vote_uri': item['vote_uri'],
+		'chamber': item['chamber'],
+		'date': item['date'],
+		'democratic_yes': item['democratic']['yes'],
+		'democratic_no': item['democratic']['no'],
+		'democratic_not_voting': item['democratic']['not_voting'],
+		'republican_yes': item['republican']['yes'],
+		'republican_no': item['republican']['no'],
+		'republican_not_voting': item['republican']['not_voting'],
+		'independent_yes': item['independent']['yes'],
+		'independent_no': item['independent']['no'],
+		'independent_not_voting': item['independent']['not_voting']
+	}
+	return dictionary
 
-def printInPassFailOrder(filehandler1, filehandler2): 
-	# we do not want to print our headers more than once
-	global first_pass_print
-	global first_fail_print
-	# now we will print a second output file, in order by what passed/failed
-	if first_pass_print:
-		filehandler1.write('All of the votes that passed/were accepted:\n')
-		filehandler1.write('==========================================\n\n')
-		first_pass_print = False
-	if len(passed_bills) > 0 or len(accepted_nominees) > 0:
-		for item in passed_bills:
-			billPrintToFile(item, filehandler1)
-		for item in accepted_nominees:
-			nominationPrintToFile(item, filehandler1)
-	else:
-		filehandler1.write('No votes passed or were accepted in the last week.\n\n')
-	if first_fail_print:
-		filehandler2.write('All of the votes that failed/were rejected:\n')
-		filehandler2.write('==========================================\n\n')
-		first_fail_print = False
-	if len(failed_bills) > 0 or len(rejected_nominees) > 0:
-		for item in failed_bills:
-			billPrintToFile(item, filehandler2)
-		for item in rejected_nominees:
-			nominationPrintToFile(item, filehandler2)
-	else:
-		filehandler2.write('No bills or nominations failed in the last week.\n\n')
+# this function expects to receive the main list of nicely-formatted actions
+# and it also wants all of the filehandlers passed in nicely
+def writeTheMarkdown(all_actions, all_fh, pass_fh, fail_fh, house_fh, senate_fh):
+	# first we write the reverse chronological/all page
+	all_fh.write('All votes held, in reverse chronological order:\n')
+	all_fh.write('============================================== \n\n')
+	for item in all_actions:
+		votePrintToFile(item, all_fh)
 
+	# now we subdivide our item
+	sub_actions = breakIntoSubCategories(all_actions)
+
+	#now we write the passed bills & noms
+	writeOneSection(sub_actions['passed_bills'], 'bills', 'passed', pass_fh)
+	writeOneSection(sub_actions['accepted_nominees'], 'nominees', 'were accepted', pass_fh)
+	writeOneSection(sub_actions['rejected_bills'], 'bills', 'failed', fail_fh)
+	writeOneSection(sub_actions['rejected_nominees'], 'nominees', 'were rejected', fail_fh)
+	writeOneSection(sub_actions['senate_actions'], 'Senate actions', 'occurred', senate_fh)
+	writeOneSection(sub_actions['house_actions'], 'House actions', 'occurred', house_fh)
+
+# writes a title with underline and then all of the appropriate votes 
+# for a given section
+def writeOneSection(category, noun, verb, filehandler):
+	# this is a little bit ridiculous, but it pleases me
+	# (generalizing my headers)
+	my_string = 'All of the %s that %s'%(noun, verb)
+	underline = ''
+	for i in range(0,len(my_string)):
+		underline += '='
+	filehandler.write('%s:\n%s\n\n'%(my_string, underline))
+	if len(category) == 0:
+		filehandler.write('No %s %s this week.\n\n' %(noun, verb))
+	else:
+		for item in category:
+			votePrintToFile(item, filehandler)
+
+# returns a string representing a date one week ago
 def aWeekAgo():
 	today = datetime.date.today()
-	a_week_ago = today - datetime.timedelta(days=40)
+	a_week_ago = today - datetime.timedelta(days=10)
 	return str(a_week_ago)
+
+# returns a string representing a date roughly a month ago
+def aMonthAgo():
+	today = datetime.date.today()
+	# look, if I go back a full month, sometimes they throw an error
+	# so I'm doing a month minus a day, to be safe
+	a_month_ago = today - datetime.timedelta(days = 28)
+	return str(a_month_ago)
+
+# formats articles pulled from the news api for nice display
+def articleFormatter(articles):
+	bullets = "\tRelated articles:\n"
+	for article in articles:
+		title = article['title']
+		url = article['url']
+		author = article['author']
+		source = article['source']['name']
+		bullets += '\t* [%s](%s)'%(title, url)
+		if author:
+			bullets += ' by %s - %s\n'%(author, source)
+		else:
+			bullets += ' - %s\n'%source
+	return bullets
 
 # grab the api key, which I've got in my .gitignore file so I don't
 # push it to GitHub
-with open('api-key.txt', 'r') as f:
+with open('propublica-key.txt', 'r') as f:
 	key = f.readline()
 	key = key.strip()
 	try:
-		getTheVotes()
+		offset = 0
+		votes = []
+		votes = getTheVotes(votes, offset) # initial call
+		# this loop is here in case they did more than 20 things this week
+		# (ProPublica's API returns 20 items per call, with an optional offset)
+		while goBackFurther(votes):
+			offset += 20
+			votes = getTheVotes(votes, offset)
+		writeTheMarkdown(votes, all_file, passed_file, failed_file, house_file, senate_file)
 	except AssertionError as e: 
 		print('The API is currently unavailable.')
 
-f2.close()
-f3.close()
-f4.close()
+all_file.close()
+passed_file.close()
+failed_file.close()
+house_file.close()
+senate_file.close()
