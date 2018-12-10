@@ -3,7 +3,7 @@
 All of the bills that failed:
 ============================
 
-No bills failed this week. TEst.
+No bills failed this week. 
 
 All of the nominees that were rejected:
 ======================================
