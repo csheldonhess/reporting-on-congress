@@ -82,7 +82,7 @@ def breakIntoSubCategories(all_actions):
 # this expects a single vote, formatted my way (by nominationFormatter/billFormatter)
 def votePrintToFile(dictionary, filehandler):
 	if dictionary['type'] == 'bill': # if it's a nomination
-		filehandler.write('%(question)s, [%(title)s](%(url)s) (%(chamber)s: %(bill_id)s): %(result)s, %(date)s' %dictionary)
+		filehandler.write('**%(question)s**, [%(title)s](%(url)s) (%(chamber)s: %(bill_id)s): %(result)s, %(date)s' %dictionary)
 		#filehandler.write('%s, %s (%s): %s, %s'%(item['question'], item['bill']['title'], item['bill']['bill_id'], item['result'], item['date']))
 		filehandler.write('\n* Democrats: ')
 		filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
@@ -95,7 +95,7 @@ def votePrintToFile(dictionary, filehandler):
 		filehandler.write('Not voting: %s' %dictionary['independent_not_voting'])
 		filehandler.write('\n\n')	
 	else: # if it's a bill
-		filehandler.write('%(result)s: [%(description)s*](%(url)s), %(chamber)s %(date)s' %dictionary)
+		filehandler.write('**%(result)s**: [%(description)s*](%(url)s), %(chamber)s %(date)s' %dictionary)
 		#filehandler.write('%s: %s, %s'%(item['result'], item['description'], item['date']))
 		filehandler.write('\n* Democrats: ')
 		filehandler.write('Yes: %(democratic_yes)s, No: %(democratic_no)s, ' %dictionary)
@@ -218,7 +218,7 @@ def aMonthAgo():
 # formats articles pulled from the news api for nice display
 def articleFormatter(articles):
 	if len(articles) > 0:
-		bullets = "\t*Related articles*:\n"
+		bullets = "\t**Related articles**:\n"
 		for article in articles:
 			title = article['title']
 			url = article['url']
