@@ -274,11 +274,11 @@ def addNews(item, filehandler):
 
 # getting the output files ready
 try: 
-	all_file = open('docs/reverse_chronological.md', 'w')
-	passed_file = open('docs/passed.md', 'w')
-	failed_file = open('docs/failed.md', 'w')
-	house_file = open('docs/house.md', 'w')
-	senate_file = open('docs/senate.md', 'w')
+	all_file = open('/Users/coral/code/reporting-on-congress/docs/reverse_chronological.md', 'w')
+	passed_file = open('/Users/coral/code/reporting-on-congress/docs/passed.md', 'w')
+	failed_file = open('/Users/coral/code/reporting-on-congress/docs/failed.md', 'w')
+	house_file = open('/Users/coral/code/reporting-on-congress/docs/house.md', 'w')
+	senate_file = open('/Users/coral/code/reporting-on-congress/docs/senate.md', 'w')
 	# just making nice breadcrumbs for usability of the site
 	all_file.write('[Reporting on Congress](index.md) &gt; Everything\n\n')
 	passed_file.write('[Reporting on Congress](index.md) &gt; Passed\n\n')
@@ -290,7 +290,7 @@ except OSError as e:
 
 # grab the api key, which I've got in my .gitignore file so I don't
 # push it to GitHub
-with open('propublica-key.txt', 'r') as f:
+with open('/Users/coral/code/reporting-on-congress/propublica-key.txt', 'r') as f:
 	key = f.readline()
 	key = key.strip()
 	try:
