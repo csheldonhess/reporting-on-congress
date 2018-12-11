@@ -16,8 +16,8 @@ def writeUpdates(filename):
 	f2 = open('/Users/coral/code/reporting-on-congress/docs/%s'%filename)
 	words = f2.read()
 	update_file = repo.file_contents('docs/%s'%filename)
+	update_file.update('blanking', 'Now this is empty.'.encode('utf-8'))
 	update_file.update(commit_message, words.encode('utf-8'))
-
 	
 writeUpdates('reverse_chronological.md')
 writeUpdates('passed.md')
