@@ -3,6 +3,26 @@
 All of the bills that passed:
 ============================
 
+**On Motion to Suspend the Rules and Pass**, [A bill to provide for the conveyance of certain property to the Southeast Alaska Regional Health Consortium located in Sitka, Alaska, and for other purposes.](http://clerk.house.gov/evs/2018/roll430.xml) (House: s825-115): Passed, 2018-12-11
+* Democrats: Yes: 187, No: 0, Not voting: 10
+* Republicans: Yes: 216, No: 3, Not voting: 17
+* Independents: Yes: 0, No: 0, Not voting: 0
+
+**On Motion to Suspend the Rules and Pass**, [A bill to revise and extend the Prematurity Research Expansion and Education for Mothers who deliver Infants Early Act (PREEMIE Act).](http://clerk.house.gov/evs/2018/roll429.xml) (House: s3029-115): Passed, 2018-12-11
+* Democrats: Yes: 188, No: 0, Not voting: 9
+* Republicans: Yes: 218, No: 3, Not voting: 15
+* Independents: Yes: 0, No: 0, Not voting: 0
+
+**On Motion to Suspend the Rules and Pass**, [To amend title XIX of the Social Security Act to provide States with the option of providing coordinated care for children with complex medical conditions through a health home, and for other purposes.](http://clerk.house.gov/evs/2018/roll428.xml) (House: hr7217-115): Passed, 2018-12-11
+* Democrats: Yes: 188, No: 0, Not voting: 9
+* Republicans: Yes: 212, No: 11, Not voting: 13
+* Independents: Yes: 0, No: 0, Not voting: 0
+
+**On the Conference Report**, [To provide for the reform and continuation of agricultural and other programs of the Department of Agriculture through fiscal year 2023, and for other purposes.](https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00259) (Senate: hr2-115): Conference Report Agreed to, 2018-12-11
+* Democrats: Yes: 47, No: 0, Not voting: 0
+* Republicans: Yes: 38, No: 13, Not voting: 0
+* Independents: Yes: 2, No: 0, Not voting: 0
+
 **On Motion to Suspend the Rules and Pass**, [To authorize the Secretary of the Interior to conduct a special resource study of the George W. Bush Childhood Home, located at 1412 West Ohio Avenue, Midland, Texas, and for other purposes.](http://clerk.house.gov/evs/2018/roll427.xml) (House: hr3008-115): Passed, 2018-12-10
 * Democrats: Yes: 176, No: 0, Not voting: 21
 * Republicans: Yes: 206, No: 4, Not voting: 24
@@ -15,6 +35,18 @@ All of the bills that passed:
 
 All of the nominees that were accepted:
 ======================================
+
+**Nomination Confirmed**: [Jonathan A. Kobes, of South Dakota, to be United States Circuit Judge for the Eighth Circuit*](https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00258), Senate 2018-12-11
+* Democrats: Yes: 0, No: 47, Not voting: 0
+* Republicans: Yes: 50, No: 1, Not voting: 0
+* Independents: Yes: 0, No: 2, Not voting: 0
+
+	**Related articles**:
+	* [GOP Confirms Another Trump Judge Who Was Rated ‘Not Qualified’ To Serve](https://www.huffingtonpost.com/entry/republicans-confirm-trump-judge-not-qualified_us_5c0fff13e4b0ac5371797422) by Jennifer Bendery - The Huffington Post
+	* [Here’s What’s at Stake in the Fight Over Trump’s New Judges](https://www.rollingstone.com/politics/politics-news/trump-judicial-appointments-759956/) by Tessa Suart - Rollingstone.com
+	* [Mike Pence just cast a historic tie-breaking vote to confirm a judge the ABA called "not qualified"](https://news.vice.com/en_us/article/qvqx5x/mike-pence-just-cast-a-historic-tie-breaking-vote-to-confirm-a-judge-the-aba-called-not-qualified) by Rex Santus - Vice News
+	* [Thomas Farr Devised Ways to Keep Blacks From Voting. Mitch McConnell Wants to Make Him a Judge.](https://www.thedailybeast.com/thomas-farr-devised-ways-to-keep-blacks-from-voting-mitch-mcconnell-wants-to-make-him-a-judge) by By Jay Michaelson - Thedailybeast.com
+	* [Jeff Flake caves again — withdrawing his ‘no’ vote on controversial judge so Pence could break the tie](https://www.rawstory.com/2018/11/jeff-flake-caves-withdrawing-no-vote-controversial-judge-pence-break-tie/) by Sarah K. Burris - Rawstory.com
 
 **Nomination Confirmed**: [Justin George Muzinich, of New York, to be Deputy Secretary of the Treasury*](https://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=115&session=2&vote=00257), Senate 2018-12-11
 * Democrats: Yes: 4, No: 43, Not voting: 0
