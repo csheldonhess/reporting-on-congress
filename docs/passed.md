@@ -1,2 +1,1 @@
-[Reporting on Congress](index.md) &gt; Passed
-
+Now this is empty.
